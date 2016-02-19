@@ -3,6 +3,10 @@ package stone.sample;
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -63,33 +67,73 @@ public class DecodeTool {
 		String[] args = cli.getArgs();
         String appDirName = args.length < 2 ? "." : args[1];
         String xmlPath = appDirName + "/AndroidManifest.xml";
-        DOMParser parser=new DOMParser();
+        DOMParser parser = new DOMParser();
         Document document = parser.parse(xmlPath);
         //get root element 
         Element rootElement = document.getDocumentElement(); 
-        NodeList nodes = rootElement.getChildNodes(); 
+        NodeList application = rootElement.getElementsByTagName("application");
+        
+        System.out.println("cmdRead");
+        NodeList nodes = application.item(0).getChildNodes();
+        // print activites
+        // NodeList nodes = rootElement.getChildNodes();
         for (int i=0; i < nodes.getLength(); i++) 
         { 
-           Node node = nodes.item(i);
-           NamedNodeMap attrs = node.getAttributes();  
-           if( attrs != null){
-	           for(int j = 0 ; j<attrs.getLength() ; j++) {
-	             Attr attribute = (Attr)attrs.item(j);     
-	             System.out.println(" " + attribute.getName()+" = "+attribute.getValue());
-	           }
-	           
-           }
-		   else{
-			   System.out.println("-" + node.getNodeName());
-		   }
-//           
-//           System.out.println(node.getNodeValue());
+        	
+        	Node node = nodes.item(i);
+        	System.out.println(node.getNodeName());
+        	if(node.getNodeName().equals("activity")){
+        		//activiy不一定有android:name吧？
+        		EntryActivity activity = new EntryActivity();
+        		activity.setName(node.getAttributes().getNamedItem("android:name").getNodeValue());
+        		activity.setData(node);
+        		parser.parseActivity(node, activity);
+//        		HashMap children = parser.parseChildNodes(node);
+        		
+//        		if(parser.containsKey(children, "intent-filter")){
+//        			activity.setMain(true);
+//        		}
+//        		Iterator iterator = children.entrySet().iterator();
+//        		while (iterator.hasNext()) {
+//        			Map.Entry entry = (Entry) iterator.next();
+//					Node xmlnode = (Node) entry.getValue();
+//					System.out.println("---"+xmlnode.getNodeName());
+//				}
+        		
+        		System.out.println("--ismain"+activity.isMain());
+        		if(activity.getFilters().size()>0){
+        			System.out.println("--filtername"+activity.getFilters().get(0).getName());
+        		}
+        		
+        		parser.names.put(activity.getName(), activity);
+        		
+        		
+        	}
+        	
+        	NamedNodeMap attrs = node.getAttributes();  
+        	if( attrs != null){
+        		for(int j = 0 ; j<attrs.getLength() ; j++) {
+        			Attr attribute = (Attr)attrs.item(j);     
+        			System.out.println("+" + attribute.getName()+" = "+attribute.getValue());
+        		}
+        	}
+        	else{
+        		System.out.println("-" + node.getNodeName());
+        	}
+
 //           if (node.getNodeType() == Node.ELEMENT_NODE) {   
 //              Element child = (Element) node; 
 //              System.out.println(child.getNodeValue());
 //              //process child element 
 //           } 
         } 
+        
+        parser.addActivity(document, "net.stone.SplashActivity");
+        parser.switchMain(document, "net.stone.SplashActivity");
+        //act.setAsMainActivity();
+        
+        
+        
 	}
 	private static void cmdBuild(CommandLine cli) {
 		String[] args = cli.getArgs();
