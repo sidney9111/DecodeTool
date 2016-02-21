@@ -32,7 +32,10 @@ import com.sun.corba.se.impl.encoding.OSFCodeSetRegistry.Entry;
 
 public class DOMParser {
 	DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance(); 
-	String filePath;
+	private String filePath;
+	String pack;
+	private int minSdkVersion = 14;
+	int buildVersionCode = 14;
 	public HashMap names = new HashMap();
 	//HashMap names=new 
 	Document document;
@@ -54,6 +57,12 @@ public class DOMParser {
 	    this.document = document;
 	    return document; 
 	} 
+	/***
+	 * 加载：所有Activities
+	 * @param node
+	 * @param activity
+	 * @return
+	 */
 	public EntryActivity parseActivity(Node node,EntryActivity activity){
 		NodeList nodelist = node.getChildNodes();
 		for(int i=0;i<nodelist.getLength();i++){
@@ -73,6 +82,25 @@ public class DOMParser {
 		
 		return activity;
 	}
+	/***
+	 * 获取:	package 
+	 * 		versioncode
+	 * @param document
+	 */
+	public void parseRootNode(Document document){
+		Element rootElement = document.getDocumentElement(); 
+		//manifest
+		this.pack = rootElement.getAttribute("package");
+		String version = rootElement.getAttribute("platformBuildVersionCode");
+		if(version.equals("")==false){
+			this.buildVersionCode = Integer.parseInt(version);
+		}
+	}
+	/***
+	 * 用于获取activity的子 node，例如:intent-filter
+	 * @param node
+	 * @return
+	 */
 	public HashMap parseChildNodes(Node node){
 		HashMap map = new HashMap();
 		NodeList nodelist = node.getChildNodes();
@@ -83,6 +111,12 @@ public class DOMParser {
 		}
 		return map;
 	}
+	/***
+	 * 转换启动Activity
+	 * (未测试清楚，可能有逻辑漏洞)
+	 * @param document
+	 * @param toName
+	 */
 	public void switchMain(Document document,String toName){
 		//找出main//删除之
 		Iterator iterator=names.entrySet().iterator();
@@ -119,11 +153,12 @@ public class DOMParser {
 		//node.appendChild(ele);
 		save(document);
 	}
-	public void removeRecursively(Node node, String name) {
-		if (node.getNodeName().equals(name)) {
-            node.getParentNode().removeChild(node);
-        }
-	}
+//	public void removeRecursively(Node node, String name) {
+//		if (node.getNodeName().equals(name)) {
+//            node.getParentNode().removeChild(node);
+//        }
+//	}
+
 	private Node addNode_main(Document document,Node activityNode){
 		
 		
@@ -141,6 +176,12 @@ public class DOMParser {
 		
 		return ele;
 	}
+	/***
+	 * 用于判断是否有该名字的activity
+	 * @param map
+	 * @param str
+	 * @return
+	 */
 	public boolean containsKey(HashMap map,String str){
 		Iterator iter = map.entrySet().iterator();
 		while(iter.hasNext()){
@@ -204,7 +245,7 @@ public class DOMParser {
         for (int i=0; i < nodes.getLength(); i++) 
         { 
         	Node node = nodes.item(i);
-        	System.out.println(node.getNodeName());
+        	//System.out.println(node.getNodeName());
         	if(node.getNodeName().equals("activity")){
         		String activityName = node.getAttributes().getNamedItem("android:name").getNodeValue();
         		if(activityName.equals(name))

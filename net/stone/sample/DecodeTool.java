@@ -69,11 +69,13 @@ public class DecodeTool {
         String xmlPath = appDirName + "/AndroidManifest.xml";
         DOMParser parser = new DOMParser();
         Document document = parser.parse(xmlPath);
+        parser.parseRootNode(document);
+        System.out.println(parser.pack);
         //get root element 
         Element rootElement = document.getDocumentElement(); 
         NodeList application = rootElement.getElementsByTagName("application");
         
-        System.out.println("cmdRead");
+        System.out.println("cmdRead....................");
         NodeList nodes = application.item(0).getChildNodes();
         // print activites
         // NodeList nodes = rootElement.getChildNodes();
@@ -81,7 +83,7 @@ public class DecodeTool {
         { 
         	
         	Node node = nodes.item(i);
-        	System.out.println(node.getNodeName());
+        	//System.out.println(node.getNodeName());
         	if(node.getNodeName().equals("activity")){
         		//activiy不一定有android:name吧？
         		EntryActivity activity = new EntryActivity();
@@ -100,9 +102,9 @@ public class DecodeTool {
 //					System.out.println("---"+xmlnode.getNodeName());
 //				}
         		
-        		System.out.println("--ismain"+activity.isMain());
+        		//System.out.println("--ismain"+activity.isMain());
         		if(activity.getFilters().size()>0){
-        			System.out.println("--filtername"+activity.getFilters().get(0).getName());
+        			//System.out.println("--filtername"+activity.getFilters().get(0).getName());
         		}
         		
         		parser.names.put(activity.getName(), activity);
@@ -114,11 +116,11 @@ public class DecodeTool {
         	if( attrs != null){
         		for(int j = 0 ; j<attrs.getLength() ; j++) {
         			Attr attribute = (Attr)attrs.item(j);     
-        			System.out.println("+" + attribute.getName()+" = "+attribute.getValue());
+        			//System.out.println("+" + attribute.getName()+" = "+attribute.getValue());
         		}
         	}
         	else{
-        		System.out.println("-" + node.getNodeName());
+        		//System.out.println("-" + node.getNodeName());
         	}
 
 //           if (node.getNodeType() == Node.ELEMENT_NODE) {   
