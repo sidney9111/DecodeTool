@@ -1,0 +1,6 @@
+<intent-filter>
+                <action android:name="com.myaction"/>
+<category android:name="android.intent.category.DEFAULT" />
+         <!--Uriͷ-->
+               <data android:scheme="myscheme"></data>
+          </intent-filter>

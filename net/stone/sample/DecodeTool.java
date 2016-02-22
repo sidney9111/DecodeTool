@@ -66,11 +66,18 @@ public class DecodeTool {
 	private static void cmdRead(CommandLine cli){
 		String[] args = cli.getArgs();
         String appDirName = args.length < 2 ? "." : args[1];
+        File file = new File(appDirName);
+        if  (!file .exists()  && !file .isDirectory())      
+        {       
+        	System.out.println("路径:"+file+",不存在");  
+        	return;
+	    } 
         String xmlPath = appDirName + "/AndroidManifest.xml";
         DOMParser parser = new DOMParser();
         Document document = parser.parse(xmlPath);
         parser.parseRootNode(document);
         System.out.println(parser.pack);
+    	
         //get root element 
         Element rootElement = document.getDocumentElement(); 
         NodeList application = rootElement.getElementsByTagName("application");
@@ -129,12 +136,18 @@ public class DecodeTool {
 //              //process child element 
 //           } 
         } 
-        
+        //----------改包名
+        if(cli.hasOption("p")){
+    		String newName = cli.getOptionValue("p");
+    		parser.changePackage(document, newName);
+    		//return;
+    	}
+        //----------追加SplashActivity
         parser.addActivity(document, "net.stone.SplashActivity");
         parser.switchMain(document, "net.stone.SplashActivity");
         //act.setAsMainActivity();
         
-        
+        //----------
         
 	}
 	private static void cmdBuild(CommandLine cli) {
@@ -181,6 +194,14 @@ public class DecodeTool {
 	                .withDescription("prints the version then exits")
 	                .create("version");
 		allOptions.addOption(versionOption);
+		
+		Option packChangeOption = Option.builder("p")
+				.required(false)
+				.longOpt("packchange")
+				.desc("change AndroidManifest.xml package name")
+				.hasArg(true)
+				.build();
+		allOptions.addOption(packChangeOption);
 	}
 	private final static Options allOptions;
 	static {

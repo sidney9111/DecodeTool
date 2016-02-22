@@ -96,6 +96,37 @@ public class DOMParser {
 			this.buildVersionCode = Integer.parseInt(version);
 		}
 	}
+	public void changePakage(Document document){
+		this.changePackage(document, "");
+	}
+	/**
+	 * 改变package的同时，赋予activity原来的package
+	 * @param document
+	 * @param newName 如果传入值为""，则不改变 package，只是赋予activity原来的package
+	 */
+	public void changePackage(Document document,String newName){
+		Iterator iterator=names.entrySet().iterator();
+		while(iterator.hasNext()){
+			Map.Entry<String,Object> item = (java.util.Map.Entry<String, Object>) iterator.next();
+			EntryActivity activity = (EntryActivity) item.getValue();
+			String srcName = activity.getName();
+			if(activity.getName().substring(0,1).equals(".")){
+				activity.setName(this.pack +  activity.getName());
+				Element activityElement= (Element) activity.getData();
+				activityElement.setAttribute("android:name", activity.getName());
+				System.out.println(srcName+"->" + activity.getName());
+			}
+			else{
+				System.out.println(srcName+"->");
+			}
+		}
+		
+		Element rootElement = document.getDocumentElement(); 
+		if(newName.equals("")==false){
+			rootElement.setAttribute("package", newName);
+		}
+		this.save(document);
+	}
 	/***
 	 * 用于获取activity的子 node，例如:intent-filter
 	 * @param node
