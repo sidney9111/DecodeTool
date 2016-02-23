@@ -58,7 +58,7 @@ public class DOMParser {
 	    return document; 
 	} 
 	/***
-	 * 加载：所有Activities
+	 * 用于加载：Activitie的子类，例如intent-filter
 	 * @param node
 	 * @param activity
 	 * @return
@@ -70,12 +70,21 @@ public class DOMParser {
 			//map.put(child.getNodeName(), child);
 			if(child.getNodeName().equals("intent-filter")){
 				NodeList filterChildren = child.getChildNodes();
+				String name ="";
+				String category= "";
 				for(int j=0;j<filterChildren.getLength();j++){
 					if (filterChildren.item(j).getNodeName().equals("action")){
-						String name = filterChildren.item(j).getAttributes().getNamedItem("android:name").getNodeValue();
-						activity.addFilterByName(name);
+						name = filterChildren.item(j).getAttributes().getNamedItem("android:name").getNodeValue();
+						
 					}
+					
+					if(filterChildren.item(j).getNodeName().equals("category")){
+						category = filterChildren.item(j).getAttributes().getNamedItem("android:name").getNodeValue();
+					}
+					
 				}
+				//activity.addFilterByName(name);
+				activity.addFilter(name,category, child);
 				
 			}
 		}
@@ -105,6 +114,7 @@ public class DOMParser {
 	 * @param newName 如果传入值为""，则不改变 package，只是赋予activity原来的package
 	 */
 	public void changePackage(Document document,String newName){
+		LogUtil.info("==改包名==");
 		Iterator iterator=names.entrySet().iterator();
 		while(iterator.hasNext()){
 			Map.Entry<String,Object> item = (java.util.Map.Entry<String, Object>) iterator.next();
@@ -155,13 +165,32 @@ public class DOMParser {
 			Map.Entry<String,Object> item = (java.util.Map.Entry<String, Object>) iterator.next();
 			EntryActivity activity = (EntryActivity) item.getValue();
 			if (activity.isMain()){
-				Node node =(Node) activity.getData();
-				NodeList list = node.getChildNodes();
-				for (int i = 0; i < list.getLength(); i++) {
-					if (list.item(i).getNodeName().equals("intent-filter")){
-						node.removeChild(list.item(i));
+				ArrayList<EntryIntentFilter> filters= activity.getFilters();
+				Node mainaction=null;
+				for(EntryIntentFilter filter:filters){
+					if(filter.getName().equals("android.intent.action.MAIN")){
+						Node node =(Node) activity.getData();//删除之
+						node.removeChild(((Node)filter.getData()));
+						
+						if(activity.getName().equals("net.stone.SplashActivity")==false)//如果是splashactivity无需追加mainaction
+						{
+							if(activity.containFilter("net.stone.mainaction")==false){
+								mainaction = this.addNode_SourceAction(document,node);
+								
+							}
+						}
 					}
 				}
+				if(mainaction!=null){
+					activity.addFilter("net.stone.mainaction", "android.intent.category.LAUNCHER", mainaction);
+				}
+//				Node node =(Node) activity.getData();
+//				NodeList list = node.getChildNodes();
+//				for (int i = 0; i < list.getLength(); i++) {
+//					if (list.item(i).getNodeName().equals("intent-filter")){
+//						node.removeChild(list.item(i));
+//					}
+//				}
 			}
 		}
 		
@@ -177,6 +206,7 @@ public class DOMParser {
 		NodeList list = node.getChildNodes();
 		for (int i = 0; i < list.getLength(); i++) {
 			if (list.item(i).getNodeName().equals("intent-filter")){
+				
 				node.removeChild(list.item(i));
 			}
 		}
@@ -189,7 +219,25 @@ public class DOMParser {
 //            node.getParentNode().removeChild(node);
 //        }
 //	}
-
+	/**
+	 * 给activity添加action:net.stone.mainaction
+	 * @param document
+	 * @param activityNode
+	 * @return
+	 */
+	private Node addNode_SourceAction(Document document,Node activityNode)
+	{
+		Node ele = document.createElement("intent-filter");
+		activityNode.appendChild(ele);
+		Element action =  document.createElement("action");
+		action.setAttribute("android:name", "net.stone.mainaction");
+		
+		ele.appendChild(action);
+		Element category = document.createElement("category");
+		category.setAttribute("android:name", "android.intent.category.LAUNCHER");
+		ele.appendChild(category);
+		return ele;
+	}
 	private Node addNode_main(Document document,Node activityNode){
 		
 		

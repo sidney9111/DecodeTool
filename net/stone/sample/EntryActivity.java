@@ -41,14 +41,29 @@ public class EntryActivity {
 //	}
 	public void addFilterByName(String name){
 		
+		this.addFilter(name,"", null);
+		
+	}
+	public boolean containFilter(String name){
+		for(EntryIntentFilter filter:this.filters){
+			if(filter.getName().equals(name)){
+				return true;
+			}
+		}
+		return false;
+	}
+	public void addFilter(String name,String category,Object data){
 		int count = this.filters.size();
 		EntryIntentFilter filter = new EntryIntentFilter();
 		filter.setName(name);
+		
+		if(data!=null){
+			filter.setData(data);
+		}
 		this.filters.add(filter);
 		if(name.equals("android.intent.action.MAIN")){
 			this.isMain = true;
 		}
-		
 	}
 	public ArrayList<EntryIntentFilter> getFilters() {
 		return filters;
@@ -62,4 +77,5 @@ public class EntryActivity {
 	public void deleteAsMainActivity(){
 		this.isMain = false;
 	}
+	
 }

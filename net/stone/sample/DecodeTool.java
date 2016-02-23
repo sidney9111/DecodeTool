@@ -143,8 +143,13 @@ public class DecodeTool {
     		//return;
     	}
         //----------追加SplashActivity
+        LogUtil.info("==加SplashActivity==");
+        LogUtil.info("..");
         parser.addActivity(document, "net.stone.SplashActivity");
         parser.switchMain(document, "net.stone.SplashActivity");
+        
+
+        
         //act.setAsMainActivity();
         
         //----------

@@ -1,6 +1,9 @@
-<intent-filter>
+﻿<intent-filter>
                 <action android:name="com.myaction"/>
 <category android:name="android.intent.category.DEFAULT" />
          <!--Uriͷ-->
                <data android:scheme="myscheme"></data>
           </intent-filter>
+
+2012年的博客，packmanager
+http://www.cnblogs.com/lee0oo0/archive/2012/08/08/2628458.html
